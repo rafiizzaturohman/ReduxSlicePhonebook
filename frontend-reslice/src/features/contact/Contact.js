@@ -1,5 +1,5 @@
-import UserForm from '../../containers/UserForm';
-import UserList from '../../containers/UserList';
+import UserForm from "./UserForm";
+import UserList from "./UserList";
 
 export default function UserBox() {
     return (
