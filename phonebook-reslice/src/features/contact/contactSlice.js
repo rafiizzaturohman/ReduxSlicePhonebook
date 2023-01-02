@@ -9,18 +9,19 @@ const initialState = {
 export const loadContactAsync = createAsyncThunk(
     'contact/loadContact',
     async () => {
-        const response = await loadContact();
-        return response.data.data;
+        const { data } = await loadContact();
+        console.log(data.data.users)
+        return data.data.users;
     }
 );
 
 export const addContactAsync = createAsyncThunk(
     'contact/addContact',
     async (id, name, phone) => {
-        const response = await addContact(name, phone);
+        const { data } = await addContact(name, phone);
         return {
             id,
-            contact: response.data.data
+            contact: data.data
         };
     }
 );
@@ -28,8 +29,9 @@ export const addContactAsync = createAsyncThunk(
 export const deleteContactAsync = createAsyncThunk(
     'contact/deleteContact',
     async (id) => {
-        const response = await removeContact(id);
-        return response.data?.data?.id;
+        const { data } = await removeContact(id);
+        console.log(data.data.users.id)
+        return data?.data?.users.id;
     }
 );
 

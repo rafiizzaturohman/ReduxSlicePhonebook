@@ -6,10 +6,10 @@ const url = axios.create({
     headers: { 'Authorization': 'token' }
 })
 
-export const loadContact = () => url.get('users')
+export const loadContact = async () => await url.get('users')
 
-export const addContact = (name, phone) => url.post('users', { name, phone })
+export const addContact = async (name, phone) => await url.post('users', { name, phone })
 
-export const updateContact = (id, name, phone) => url.put(`users/${id}`, { name, phone })
+export const updateContact = async (id, name, phone) => await url.put(`users/${id}`, { name, phone })
 
-export const removeContact = (id) => url.delete(`users/${id}`)
+export const removeContact = async (id) => await url.delete(`users/${id}`)
