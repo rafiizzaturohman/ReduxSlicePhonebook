@@ -1,5 +1,5 @@
 {
-  "name": "frontend-reslice",
+  "name": "phonebook-reslice",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

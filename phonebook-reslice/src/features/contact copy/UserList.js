@@ -4,7 +4,7 @@ import { loadContactAsync, selectContact, addContactAsync, deleteContactAsync } 
 import UserItem from '../../component/UserItem'
 
 export default function UserList(props) {
-    const contact = useSelector(selectContact())
+    const contact = useSelector(selectContact)
     const dispatch = useDispatch()
 
     useEffect(() => {

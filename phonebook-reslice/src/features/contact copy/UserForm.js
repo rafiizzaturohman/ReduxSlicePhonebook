@@ -90,14 +90,14 @@ export default function UserForm(props) {
                             <div className='flex space-x-2'>
                                 <button type='submit' className='transition flex text-white bg-blue-500 hover:bg-blue-600 hover:delay-150 rounded-lg font-semibold items-center space-x-3 pr-6'>
                                     <div className='bg-blue-600 px-2 py-1 rounded-lg'>
-                                        <FontAwesomeIcon icon='plus' />
+                                        {/* <FontAwesomeIcon icon='plus' /> */}
                                     </div>
                                     <p>Add</p>
                                 </button>
 
                                 <button type='button' onClick={() => setContact({ addCond: false, name: '', phone: '' })} className='transition flex text-white bg-amber-500 hover:bg-amber-600 hover:delay-150 rounded-lg font-semibold items-center space-x-2 pr-3'>
                                     <div className='bg-amber-600 px-2 py-1 rounded-lg'>
-                                        <FontAwesomeIcon icon='ban' />
+                                        {/* <FontAwesomeIcon icon='ban' /> */}
                                     </div>
                                     <p>Cancel</p>
                                 </button>

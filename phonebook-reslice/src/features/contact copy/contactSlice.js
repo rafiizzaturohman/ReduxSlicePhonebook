@@ -26,7 +26,7 @@ export const addContactAsync = createAsyncThunk(
 );
 
 export const deleteContactAsync = createAsyncThunk(
-    'contact/addContact',
+    'contact/deleteContact',
     async (id) => {
         const response = await removeContact(id);
         return response.data?.data?.id;
@@ -54,7 +54,7 @@ export const contactSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(addContactAsync.fulfilled, (state, action) => {
-                // state.status = 'idle';
+                state.status = 'idle';
                 state.value = {
                     ...state,
                     data: state.data.map(item => {
