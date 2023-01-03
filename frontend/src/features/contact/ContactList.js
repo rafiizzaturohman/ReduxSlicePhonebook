@@ -22,7 +22,9 @@ export default function ContactList(props) {
         <div onScroll={scrolling} className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 py-4 px-2 max-h-screen overflow-y-auto h-107">
             {
                 contact.map((user, index) => (
-                    <ContactItem key={user.id} users={user} sent={user.sent} resend={() => dispatch(addContactAsync(user.id, user.name, user.phone))} update={(name, phone) => dispatch(updateContactAsync({ id: user.id, name, phone }))} remove={() => dispatch(removeContactAsync({ id: user.id }))} />
+                    <ContactItem key={user.id} users={user} sent={user.sent} resend={() => dispatch(addContactAsync(user.id, user.name, user.phone))}
+                        // update={(name, phone) => dispatch(updateContactAsync({ id: user.id, name, phone }))} 
+                        remove={() => dispatch(removeContactAsync({ id: user.id }))} />
                 ))
             }
         </div>
