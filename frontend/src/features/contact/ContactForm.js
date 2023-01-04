@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { create } from './contactSlice';
+import { create, search } from './contactSlice';
 
 export default function ContactForm(props) {
     const dispatch = useDispatch()
@@ -30,11 +30,11 @@ export default function ContactForm(props) {
         setContact({ addCond: true, name: '', phone: '' })
     }, [dispatch, contact])
 
-    // const handleSearch = useCallback((event) => {
-    //     event.preventDefault()
-    //     dispatch(searchContact(contact.searchName, contact.searchPhone))
-    //     // setContact({ name: '', phone: '' })
-    // }, [contact])
+    const handleSearch = useCallback((event) => {
+        event.preventDefault()
+        dispatch(search(contact.searchName, contact.searchPhone))
+        // setContact({ name: '', phone: '' })
+    }, [contact])
 
     if (contact.addCond) {
         return (
@@ -45,7 +45,7 @@ export default function ContactForm(props) {
                         <h1 className=' text-lg text-white font-bold'>Search Contact</h1>
                     </div>
 
-                    <form className=''>
+                    <form onSubmit={handleSearch} className=''>
                         <div id='searchForm' className='space-y-8 mt-8'>
                             <div className='space-x-5 flex justify-evenly items-center'>
                                 <label className='text-lg font-semibold tracking-wide' htmlFor='searchName'>Name</label>
@@ -109,7 +109,7 @@ export default function ContactForm(props) {
                         <h1 className=' text-lg text-white font-bold'>Search Contact</h1>
                     </div>
 
-                    <form className=''>
+                    <form onSubmit={handleSearch} className=''>
                         <div id='searchForm' className='space-y-8 mt-8'>
                             <div className='space-x-6 flex justify-evenly items-center'>
                                 <label className='text-lg font-semibold tracking-wide' htmlFor='searchName'>Name</label>

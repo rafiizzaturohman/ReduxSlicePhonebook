@@ -2,11 +2,26 @@ import { useCallback, useState } from 'react';
 
 export default function ContactItem(props) {
     const [contact, setContact] = useState({
-        editCond: false,
         id: props.users.id,
         name: props.users.name,
         phone: props.users.phone
     })
+
+    const [isEdit, setEdit] = useState({
+        editCond: false,
+    })
+
+    const editTrue = () => {
+        setEdit({
+            editCond: true
+        })
+    }
+
+    const editFalse = () => {
+        setEdit({
+            editCond: false
+        })
+    }
 
     const handleInputChange = (event) => {
         const target = event.target;
@@ -22,10 +37,11 @@ export default function ContactItem(props) {
     const handleUpdate = useCallback((event) => {
         event.preventDefault()
         props.update(props.users.name, props.users.phone)
-        setContact({ editCond: false, name: contact.name, phone: contact.phone })
+        setContact({ name: contact.name, phone: contact.phone })
+        setEdit({ editCond: false })
     }, [props, contact])
 
-    if (contact.editCond) {
+    if (isEdit.editCond) {
         return (
             <div className='container shadow-2xl shadow-slate-300 bg-white/80 rounded-lg w-auto h-auto space-y-2 px-8 py-5' >
                 <div className='flex space-x-3 items-center'>
@@ -39,7 +55,7 @@ export default function ContactItem(props) {
                 <div className='flex justify-evenly py-2'>
                     <button type='button' onClick={handleUpdate} className='transition hover:text-slate-400 hover:delay-100 font-semibold tracking-wider'>Update</button>
 
-                    <button type='button' onClick={() => setContact({ editCond: false, name: contact.name, phone: contact.phone })} className='transition hover:text-slate-400 hover:delay-100 font-semibold tracking-wider'>Cancel</button>
+                    <button type='button' onClick={editFalse} className='transition hover:text-slate-400 hover:delay-100 font-semibold tracking-wider'>Cancel</button>
                 </div>
             </div>
         )
@@ -47,15 +63,15 @@ export default function ContactItem(props) {
         return (
             <div className='transition ease-in-out container shadow-lg shadow-slate-300 bg-white/80 rounded-lg w-auto h-auto space-y-4 px-8 py-5  border-2 border-blue-200 hover:-translate-y-1 hover:scale-103' >
                 <div className='flex space-x-3 items-center'>
-                    <h1>{contact.name}</h1>
+                    <h1>{props.users.name}</h1>
                 </div>
 
                 <div className='flex space-x-4 items-center opacity-60'>
-                    <h1>{contact.phone}</h1>
+                    <h1>{props.users.phone}</h1>
                 </div>
 
                 <div className='flex justify-evenly py-2'>
-                    <button type='button' onClick={() => setContact({ editCond: true, name: props.users.name, phone: props.users.phone })} className='transition hover:text-slate-400 hover:delay-100 font-semibold tracking-wider'>
+                    <button type='button' onClick={editTrue} className='transition hover:text-slate-400 hover:delay-100 font-semibold tracking-wider'>
                         Edit
                     </button>
 

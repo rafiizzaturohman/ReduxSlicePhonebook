@@ -1,6 +1,14 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { loadContact, addContact, removeContact, updateContact } from './contactAPI';
 
+import axios from 'axios';
+
+const url = axios.create({
+    baseURL: 'http://localhost:3002/',
+    timeout: 1000,
+    headers: { 'Authorization': 'token' }
+})
+
 const initialState = {
     value: {
         data: [],
@@ -15,8 +23,12 @@ const initialState = {
 export const loadContactAsync = createAsyncThunk(
     'contact/loadContact',
     async () => {
-        const response = await loadContact();
-        return { data: response.data.data.users, page: response.data.data.page, pages: response.data.data.pages };
+        try {
+            const response = await loadContact();
+            return { data: response.data.data.users, page: response.data.data.page, pages: response.data.data.pages };
+        } catch (error) {
+            console.log(error)
+        }
     }
 );
 
@@ -32,11 +44,30 @@ export const addContactAsync = createAsyncThunk(
     }
 );
 
+export const updateContactAsync = createAsyncThunk(
+    'contact/updateContact',
+    async ({ id, name, phone }) => {
+        try {
+            const response = await updateContact(id, name, phone)
+            return { id, data: response.data.data }
+        } catch (error) {
+            alert('Failed to update data')
+            console.log(error)
+        }
+    }
+)
+
 export const removeContactAsync = createAsyncThunk(
     'contact/removeContact',
     async ({ id }) => {
-        const response = await removeContact(id);
-        return response?.data?.data?.id
+        try {
+            const response = await removeContact(id);
+            console.log(response.data.data)
+            return response.data.data
+        } catch (error) {
+            alert('Failed to remove data')
+            console.log(error)
+        }
     }
 );
 
@@ -59,6 +90,24 @@ export const contactSlice = createSlice({
                 ]
             }
 
+        },
+        loadPage: (state, action) => {
+            state.value = {
+                data: [...state.value.data, ...action.payload.value.map(item => {
+                    item.sent = true
+                    return item
+                })],
+                params: action.payload.params
+            }
+        },
+        searchContact: (state, action) => {
+            state.value = {
+                data: action.payload.value.map(item => {
+                    item.sent = true
+                    return item
+                }),
+                params: action.payload.params
+            }
         }
     },
     extraReducers: (builder) => {
@@ -114,17 +163,34 @@ export const contactSlice = createSlice({
                     }
                 }
             })
+            .addCase(updateContactAsync.fulfilled, (state, action) => {
+                state.status = 'idle'
+                state.value = {
+                    ...state.value,
+                    data: [...state.value.data.map(item => {
+                        if (item.id === action.payload.id) {
+                            return {
+                                id: action.payload.data.id,
+                                name: action.payload.data.name,
+                                phone: action.payload.data.phone,
+                                sent: true
+                            }
+                        }
+                        return item
+                    })]
+                }
+            })
             .addCase(removeContactAsync.fulfilled, (state, action) => {
                 state.status = 'idle';
                 state.value = {
                     ...state.value,
-                    data: state.value.data.filter(item => item.id !== action.payload)
+                    data: state.value.data.filter(item => item.id !== action.id)
                 }
             })
     },
 });
 
-export const { add } = contactSlice.actions;
+export const { add, loadPage, searchContact } = contactSlice.actions;
 
 export const selectContact = (state) => state.contact.value.data;
 
@@ -132,11 +198,51 @@ export const load = () => (dispatch, getState) => {
     dispatch(loadContactAsync())
 };
 
+export const loadMore = () => (dispatch, getState) => {
+    let state = getState()
+    if (state.contact.value.params.page <= state.contact.value.params.pages) {
+        let params = {
+            ...state.contact.value.params,
+            page: state.contact.value.params.page + 1
+        }
+        url.get('users', { params }).then(({ data }) => {
+            params = {
+                ...params,
+                pages: data.data.pages
+            }
+            dispatch(loadPage({ value: data.data.users, params }))
+        })
+    }
+};
+
 export const create = (name, phone) => (dispatch, getState) => {
     const id = Date.now()
     dispatch(add({ id, name, phone }))
     dispatch(addContactAsync({ id, name, phone }))
 };
+
+export const update = (name, phone) => (dispatch, getState) => {
+    const id = Date.now()
+    dispatch(updateContact({ id, name, phone }))
+    dispatch(updateContactAsync({ id, name, phone }))
+};
+
+export const search = (searchName, searchPhone) => (dispatch, getState) => {
+    let state = getState()
+    let params = {
+        ...state.contact.value.params,
+        searchName,
+        searchPhone,
+        page: 1
+    }
+    url.get('users', { params }).then(({ data }) => {
+        params = {
+            ...params,
+            pages: data.data.pages
+        }
+        dispatch(searchContact({ value: data.data.users, params }))
+    })
+}
 
 
 export default contactSlice.reducer;

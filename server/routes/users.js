@@ -126,7 +126,8 @@ router.post('/', async (req, res, next) => {
 
 router.put('/:id', async (req, res, next) => {
   try {
-    const users = await models.User.update(req.body, {
+    const { name, phone } = req.body
+    const users = await models.User.update({ name, phone }, {
       where: {
         id: req.params.id
       },
