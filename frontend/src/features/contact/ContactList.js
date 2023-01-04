@@ -26,7 +26,7 @@ export default function ContactList(props) {
                         key={user.id}
                         users={user}
                         sent={user.sent}
-                        resend={() => dispatch(addContactAsync(user.id, user.name, user.phone))}
+                        resend={() => dispatch(addContactAsync({ id: user.id, name: user.name, phone: user.phone }))}
                         update={(name, phone) => dispatch(updateContactAsync({ id: user.id, name: name, phone: phone }))}
                         remove={() => dispatch(removeContactAsync({ id: user.id }))} />
                 ))

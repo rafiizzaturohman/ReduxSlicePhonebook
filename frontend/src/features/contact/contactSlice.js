@@ -24,8 +24,9 @@ export const loadContactAsync = createAsyncThunk(
     'contact/loadContact',
     async () => {
         try {
-            const response = await loadContact();
-            return { data: response.data.data.users, page: response.data.data.page, pages: response.data.data.pages };
+            const { data } = await loadContact();
+            console.log(data)
+            return { data: data.data.users, page: data.data.page, pages: data.data.pages };
         } catch (error) {
             console.log(error)
         }
@@ -36,8 +37,8 @@ export const addContactAsync = createAsyncThunk(
     'contact/addContact',
     async ({ id, name, phone }) => {
         try {
-            const response = await addContact(name, phone);
-            return { success: true, id, data: response.data.data }
+            const { data } = await addContact(name, phone);
+            return { success: true, id, data: data.data }
         } catch (error) {
             return { success: false, id }
         }
@@ -48,8 +49,8 @@ export const updateContactAsync = createAsyncThunk(
     'contact/updateContact',
     async ({ id, name, phone }) => {
         try {
-            const response = await updateContact(id, name, phone)
-            return { id, data: response.data.data }
+            const { data } = await updateContact(id, name, phone)
+            return { id, data: data.data }
         } catch (error) {
             alert('Failed to update data')
             console.log(error)
@@ -61,9 +62,8 @@ export const removeContactAsync = createAsyncThunk(
     'contact/removeContact',
     async ({ id }) => {
         try {
-            const response = await removeContact(id);
-            console.log(response.data.data)
-            return response.data.data
+            const { data } = await removeContact(id);
+            return { id, data: data.data }
         } catch (error) {
             alert('Failed to remove data')
             console.log(error)
@@ -79,17 +79,13 @@ export const contactSlice = createSlice({
         add: (state, action) => {
             state.value = {
                 ...state.value,
-                data: [
-                    ...state.value.data,
-                    {
-                        id: action.payload.id,
-                        name: action.payload.name,
-                        phone: action.payload.phone,
-                        sent: true
-                    }
-                ]
+                data: [...state.value.data, {
+                    id: action.payload.id,
+                    name: action.payload.name,
+                    phone: action.payload.phone,
+                    sent: true
+                }]
             }
-
         },
         loadPage: (state, action) => {
             state.value = {
@@ -123,8 +119,8 @@ export const contactSlice = createSlice({
                         return item
                     }),
                     params: {
-                        page: action.page,
-                        pages: action.pages
+                        page: action.payload.page,
+                        pages: action.payload.pages
                     }
                 }
             })
@@ -136,21 +132,21 @@ export const contactSlice = createSlice({
                 if (action.payload.success) {
                     state.value = {
                         ...state.value,
-                        data: [...state.value.data.map(item => {
+                        data: state.value.data.map(item => {
                             if (item.id === action.payload.id) {
                                 return {
-                                    id: action.payload.data.id,
-                                    name: action.payload.data.name,
-                                    phone: action.payload.data.phone,
+                                    id: action.payload.id,
+                                    name: action.payload.name,
+                                    phone: action.payload.phone,
                                     sent: true
                                 }
                             }
                             return item
-                        })]
-                    };
+                        })
+                    }
                 } else {
                     state.value = {
-                        ...state.value,
+                        ...state,
                         data: [...state.value.data.map(item => {
                             if (item.id === action.payload.id) {
                                 return {
@@ -167,7 +163,7 @@ export const contactSlice = createSlice({
                 state.status = 'idle'
                 state.value = {
                     ...state.value,
-                    data: [...state.value.data.map(item => {
+                    data: state.value.data.map(item => {
                         if (item.id === action.payload.id) {
                             return {
                                 id: action.payload.data.id,
@@ -177,14 +173,14 @@ export const contactSlice = createSlice({
                             }
                         }
                         return item
-                    })]
-                }
+                    })
+                };
             })
             .addCase(removeContactAsync.fulfilled, (state, action) => {
                 state.status = 'idle';
                 state.value = {
                     ...state.value,
-                    data: state.value.data.filter(item => item.id !== action.id)
+                    data: state.value.data.filter(item => item.id !== action.payload.id)
                 }
             })
     },
@@ -194,55 +190,60 @@ export const { add, loadPage, searchContact } = contactSlice.actions;
 
 export const selectContact = (state) => state.contact.value.data;
 
-export const load = () => (dispatch, getState) => {
-    dispatch(loadContactAsync())
-};
+export const loadMore = () => {
+    return async (dispatch, getState) => {
+        try {
+            let state = getState()
+            console.log(state)
+            if (state.contact.value.params.page <= state.contact.value.params.pages) {
+                let params = {
+                    ...state.contact.value.params,
+                    page: state.contact.value.params.page + 1
+                }
+                const { data } = await url.get('users', { params })
+                params = {
+                    ...params,
+                    pages: data.data.pages
+                }
+                dispatch(loadPage({ value: data.data.users, params }))
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+}
 
-export const loadMore = () => (dispatch, getState) => {
-    let state = getState()
-    if (state.contact.value.params.page <= state.contact.value.params.pages) {
+export const create = (name, phone) => {
+    return async (dispatch, getState) => {
+        const id = Date.now()
+        dispatch(add({ id, name, phone }))
+        dispatch(addContactAsync({ id, name, phone }))
+    };
+}
+
+export const update = (name, phone) => {
+    return async (dispatch, getState) => {
+        const id = Date.now()
+        dispatch(updateContact({ id, name, phone }))
+        dispatch(updateContactAsync({ id, name, phone }))
+    }
+}
+export const search = (searchName, searchPhone) => {
+    return async (dispatch, getState) => {
+        let state = getState()
         let params = {
             ...state.contact.value.params,
-            page: state.contact.value.params.page + 1
+            searchName,
+            searchPhone,
+            page: 1
         }
-        url.get('users', { params }).then(({ data }) => {
-            params = {
-                ...params,
-                pages: data.data.pages
-            }
-            dispatch(loadPage({ value: data.data.users, params }))
-        })
-    }
-};
-
-export const create = (name, phone) => (dispatch, getState) => {
-    const id = Date.now()
-    dispatch(add({ id, name, phone }))
-    dispatch(addContactAsync({ id, name, phone }))
-};
-
-export const update = (name, phone) => (dispatch, getState) => {
-    const id = Date.now()
-    dispatch(updateContact({ id, name, phone }))
-    dispatch(updateContactAsync({ id, name, phone }))
-};
-
-export const search = (searchName, searchPhone) => (dispatch, getState) => {
-    let state = getState()
-    let params = {
-        ...state.contact.value.params,
-        searchName,
-        searchPhone,
-        page: 1
-    }
-    url.get('users', { params }).then(({ data }) => {
+        const { data } = await url.get('users', { params })
         params = {
             ...params,
             pages: data.data.pages
         }
         dispatch(searchContact({ value: data.data.users, params }))
-    })
+    }
 }
-
 
 export default contactSlice.reducer;
