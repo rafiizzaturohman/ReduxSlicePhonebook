@@ -214,10 +214,8 @@ export const loadMore = () => {
 export const create = (name, phone) => {
     return async (dispatch, getState) => {
         const id = Date.now()
-        if (!dispatch(search())) {
-            dispatch(add({ id, name, phone }))
-            dispatch(addContactAsync({ id, name, phone }))
-        }
+        dispatch(add({ id, name, phone }))
+        dispatch(addContactAsync({ id, name, phone }))
     };
 }
 
