@@ -25,7 +25,6 @@ export const loadContactAsync = createAsyncThunk(
     async () => {
         try {
             const { data } = await loadContact();
-            console.log(data)
             return { data: data.data.users, page: data.data.page, pages: data.data.pages };
         } catch (error) {
             console.log(error)
@@ -50,7 +49,7 @@ export const updateContactAsync = createAsyncThunk(
     async ({ id, name, phone }) => {
         try {
             const { data } = await updateContact(id, name, phone)
-            return { id, data: data.data }
+            return (id, data.data)
         } catch (error) {
             alert('Failed to update data')
             console.log(error)
@@ -135,9 +134,9 @@ export const contactSlice = createSlice({
                         data: state.value.data.map(item => {
                             if (item.id === action.payload.id) {
                                 return {
-                                    id: action.payload.id,
-                                    name: action.payload.name,
-                                    phone: action.payload.phone,
+                                    id: action.payload.data.id,
+                                    name: action.payload.data.name,
+                                    phone: action.payload.data.phone,
                                     sent: true
                                 }
                             }
@@ -164,7 +163,7 @@ export const contactSlice = createSlice({
                 state.value = {
                     ...state.value,
                     data: state.value.data.map(item => {
-                        if (item.id === action.payload.id) {
+                        if (item.id === action.id) {
                             return {
                                 id: action.payload.data.id,
                                 name: action.payload.data.name,
@@ -174,7 +173,7 @@ export const contactSlice = createSlice({
                         }
                         return item
                     })
-                };
+                }
             })
             .addCase(removeContactAsync.fulfilled, (state, action) => {
                 state.status = 'idle';
@@ -194,7 +193,6 @@ export const loadMore = () => {
     return async (dispatch, getState) => {
         try {
             let state = getState()
-            console.log(state)
             if (state.contact.value.params.page <= state.contact.value.params.pages) {
                 let params = {
                     ...state.contact.value.params,
@@ -216,8 +214,10 @@ export const loadMore = () => {
 export const create = (name, phone) => {
     return async (dispatch, getState) => {
         const id = Date.now()
-        dispatch(add({ id, name, phone }))
-        dispatch(addContactAsync({ id, name, phone }))
+        if (!dispatch(search())) {
+            dispatch(add({ id, name, phone }))
+            dispatch(addContactAsync({ id, name, phone }))
+        }
     };
 }
 
