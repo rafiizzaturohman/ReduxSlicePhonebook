@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
 
-
 export default function ContactItem(props) {
     const [contact, setContact] = useState({
         id: props.users.id,
@@ -37,7 +36,7 @@ export default function ContactItem(props) {
 
     const handleUpdate = useCallback((event) => {
         event.preventDefault()
-        props.update(props.users.name, props.users.phone)
+        props.update(contact.name, contact.phone)
         setContact({ name: contact.name, phone: contact.phone })
         editFalse()
     }, [props, contact])

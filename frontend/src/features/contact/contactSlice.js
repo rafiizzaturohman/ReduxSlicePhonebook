@@ -49,7 +49,7 @@ export const updateContactAsync = createAsyncThunk(
     async ({ id, name, phone }) => {
         try {
             const { data } = await updateContact(id, name, phone)
-            return (id, data.data)
+            return ({ success: true, id, data: data.data })
         } catch (error) {
             alert('Failed to update data')
             console.log(error)
@@ -93,6 +93,19 @@ export const contactSlice = createSlice({
                     return item
                 })],
                 params: action.payload.params
+            }
+        },
+        update: (state, action) => {
+            state.value = {
+                data: [
+                    ...state.value.data,
+                    {
+                        id: action.payload.id,
+                        name: action.payload.name,
+                        phone: action.payload.phone,
+                        sent: true
+                    }
+                ]
             }
         },
         searchContact: (state, action) => {
@@ -222,10 +235,11 @@ export const create = (name, phone) => {
 export const update = (name, phone) => {
     return async (dispatch, getState) => {
         const id = Date.now()
-        dispatch(updateContact({ id, name, phone }))
+        dispatch(update({ id, name, phone }))
         dispatch(updateContactAsync({ id, name, phone }))
     }
 }
+
 export const search = (searchName, searchPhone) => {
     return async (dispatch, getState) => {
         let state = getState()
